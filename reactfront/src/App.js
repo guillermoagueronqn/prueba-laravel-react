@@ -2,19 +2,29 @@ import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // componentes
+
+// PUBLIC
 import LayoutPublic from './layouts/LayoutPublic';
 import Login from './pageauth/Login';
 import Register from './pageauth/Register';
-
-import LayoutAdministrador from './layouts/LayoutAdministrador';
-import LayoutCliente from './layouts/LayoutCliente';
-import LayoutGestorComplejo from './layouts/LayoutGestorComplejo';
 import PageHome from './pagepublic/PageHome';
+
+// PRIVATE
 import ProtectedRoutes from './pageauth/ProtectedRoutes';
+
+// ROL ADMIN
+import LayoutAdministrador from './layouts/LayoutAdministrador';
 import Panel from './pageadministrador/Panel';
-import WelcomeCliente from './pagecliente/WelcomeCliente';
-import WelcomeGestor from './pagegestorcomplejo/WelcomeGestor';
 import Bienvenida from './pageadministrador/Bienvenida';
+
+// ROL CLIENTE
+import LayoutCliente from './layouts/LayoutCliente';
+import WelcomeCliente from './pagecliente/WelcomeCliente';
+
+// ROL GESTOR DE COMPLEJOS
+import LayoutGestorComplejo from './layouts/LayoutGestorComplejo';
+import WelcomeGestor from './pagegestorcomplejo/WelcomeGestor';
+import MiComplejo from './pagegestorcomplejo/MiComplejo';
 
 function App() {
   return (
@@ -35,8 +45,8 @@ function App() {
 
           {/* Rutas para administradores */}
             <Route path='/administrador' element={<LayoutAdministrador/>}>
-              <Route index element={<Panel/>}/>
-              <Route path='/administrador/bienvenida' element={<Bienvenida/>} />
+              <Route index element={<Bienvenida/>}/>
+              <Route path='panel' element={<Panel/>} />
             </Route>
 
           {/* Rutas para clientes */}
@@ -47,8 +57,8 @@ function App() {
           {/* Rutas para gestores de complejo */}
             <Route path='/gestorComplejo' element={<LayoutGestorComplejo/>}>
               <Route index element={<WelcomeGestor/>}/>
+              <Route path='miComplejo' element={<MiComplejo/>}/>
             </Route>
-
           </Route>
         </Routes>
       </BrowserRouter>

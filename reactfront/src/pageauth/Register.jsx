@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthUser from "./AuthUser";
 import useForm from "../hooks/useForm";
+import { useModal } from "../hooks/useModal";
+import Modal from "../components/Modal/Modal";
 
 
 // se inicializan las variables que se le pasarán al hook personalizado
@@ -48,7 +50,6 @@ const validationsForm = (form) => {
     return errors;
 }
 
-
 const Register = () => {
     // se obtienen los valores del formulario del hook personalizado para luego mostrar errores en caso de ser necesario
     const {
@@ -65,6 +66,9 @@ const Register = () => {
     const idRol = form.idRol;
     const [errors, setErrors] = useState({});
 
+    // variables para manejar los modales
+    const [isOpenModal, openModal, closeModal] = useModal(false);
+    const [isOpenModalFallido, openModalFallido, closeModalFallido] = useModal(false);
 
     // constantes para utilizar navigate y generar obtener un token en caso de que el usuario esté registrado
     const navigate = useNavigate();
@@ -94,8 +98,11 @@ const Register = () => {
                     /*console.log(data.user);
                     console.log(data.herencia);
                     console.log(data.message);*/
-                    navigate('/login');
+                    //navigate('/login');
+                    console.log("registrado exitosamente");
+                    openModal();// se abre el modal
                 } else {
+                    openModalFallido();
                     /*console.log(data.message);*/
                 }
             });
@@ -182,6 +189,33 @@ const Register = () => {
 
             <button onClick={submitRegistro} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
             </form>
+
+
+            {/* modal exitoso */}
+            <Modal isOpen={isOpenModal} closeModal={closeModal}>
+                <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-16 text-green-600">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </div>
+                <h3 className="mb-4 text-lg font-semibold text-center">Usuario creado exitosamente!</h3>
+                <button onClick={() => navigate('/login')} className="bg-blue-500 text-white border-none px-4 py-2 rounded transition-colors duration-300 hover:bg-blue-600">
+                    Ir a Login
+                </button>
+            </Modal>
+
+            {/* modal fallido */}
+            <Modal isOpen={isOpenModalFallido} closeModal={closeModalFallido}>
+                <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-16 text-red-600">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                    </svg>
+                </div>
+                <h3 className="mb-4 text-lg font-semibold text-center">No se pudo crear el usuario. Intente más tarde</h3>
+                <button onClick={closeModalFallido} className="bg-blue-500 text-white border-none px-4 py-2 rounded transition-colors duration-300 hover:bg-blue-600">
+                    Cerrar
+                </button>
+            </Modal>
         </div>
     )
 }

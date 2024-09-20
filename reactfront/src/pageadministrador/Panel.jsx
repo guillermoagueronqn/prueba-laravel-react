@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import AuthUser from "../pageauth/AuthUser";
+import { useModal } from "../hooks/useModal";
+import Modal from "../components/Modal/Modal";
 
 const Panel = () => {
   // Estado para controlar los filtros por roles y por dados de baja o no
@@ -8,26 +10,39 @@ const Panel = () => {
   const [dadoDeBaja, setDadoDeBaja] = useState(false);
 
   // Estado para controlar la visibilidad del modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
 
-  // Ref para el modal
-  const modalRef = useRef(null);
+  // nuevo
+  const [isOpenModalBaja, openModalBaja, closeModalBaja] = useModal(false);
+  const [isOpenModalAlta, openModalAlta, closeModalAlta] = useModal(false);
 
   const [users, setUsers] = useState([]);
   const { getToken } = AuthUser();
   const endpoint = "http://localhost:8000/api/admin/users";
 
-  // Funciones para abrir y cerrar el modal
-  const openModal = (id) => {
+  // Funciones para abrir y cerrar el modal de baja
+  const openModalBaja1 = (id) => {
     setCurrentUserId(id);
-    setIsModalOpen(true);
+    openModalBaja();
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const closeModalBaja1 = () => {
+    closeModalBaja();
     setCurrentUserId(null);
   };
+
+
+  // Funciones para abrir y cerrar el modal de alta
+  const openModalAlta1 = (id) => {
+    setCurrentUserId(id);
+    openModalAlta();
+  };
+
+  const closeModalAlta1 = () => {
+    closeModalAlta();
+    setCurrentUserId(null);
+  };
+
 
   // Función para cambiar el estado del usuario
   const cambiarEstadoUsuario = async () => {
@@ -41,7 +56,8 @@ const Panel = () => {
         if (data.success) {
           console.log(data.message);
           getAllUsers(); // Actualiza la lista de usuarios
-          closeModal(); // Cierra el modal
+          closeModalBaja1(); // Cierra el modal de baja
+          closeModalAlta1(); // Cierra el modal de alta
         } else {
           console.log(data.error);
         }
@@ -63,16 +79,6 @@ const Panel = () => {
   useEffect(() => {
     getAllUsers();
   }, []);
-
-  useEffect(() => {
-    if (modalRef.current) {
-      if (isModalOpen) {
-        modalRef.current.showModal(); // Muestra el modal
-      } else {
-        modalRef.current.close(); // Cierra el modal
-      }
-    }
-  }, [isModalOpen]);
 
   //Función para filtrar según el rol elegido
   const filtrarPorRol = (rol) => {
@@ -143,7 +149,7 @@ const Panel = () => {
         <input checked={dadoDeBaja === false}
           onChange={handleFilterChange2} 
           id="bordered-radio-2" type="radio" value="false" name="bordered-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
-        <label htmlFor="bordered-radio-2" className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Usuarios dados de alta</label>
+        <label htmlFor="bordered-radio-2" className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Usuarios activos</label>
       </div>
       {/* Tabla */}
       <div className="overflow-x-auto mt-32">
@@ -173,7 +179,7 @@ const Panel = () => {
                 && <td className="px-4 py-3 max-w-[12rem] truncate">
                       <button
                         type="button"
-                        onClick={() => openModal(user.id)}
+                        onClick={() => openModalAlta1(user.id)}
                         className="flex items-center text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-3 py-2 text-center dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-green-900"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-5">
@@ -187,7 +193,7 @@ const Panel = () => {
                 && <td className="px-4 py-3 max-w-[12rem] truncate">
                       <button
                         type="button"
-                        onClick={() => openModal(user.id)}
+                        onClick={() => openModalBaja1(user.id)}
                         className="flex items-center text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-3 py-2 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 -ml-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -202,43 +208,42 @@ const Panel = () => {
           </tbody>
         </table>
       </div>
-      {/* Modal */}
-      <dialog ref={modalRef} className="fixed inset-0 z-50 p-4 overflow-x-hidden overflow-y-auto bg-gray-900 bg-opacity-50">
-        <div className="relative w-full max-w-lg mx-auto my-6 bg-white rounded-lg shadow-lg">
-          <div className="p-6 text-center">
-            <button
-              type="button"
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-              onClick={closeModal}
-            >
-              <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-              <span className="sr-only">Close modal</span>
-            </button>
-            <svg aria-hidden="true" className="mx-auto mb-4 text-gray-400 w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 className="mb-4 text-lg font-medium text-gray-900">Seguro que quieres realizar la acción?</h3>
-            <div className="flex justify-center">
-              <button
-                type="button"
-                className="text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2"
-                onClick={cambiarEstadoUsuario}
-              >
-                Si, estoy seguro
-              </button>
-              <button
-                type="button"
-                className="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 text-center"
-                onClick={closeModal}
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
+
+
+      {/* modal para confirmacion de dar de baja */}
+      <Modal isOpen={isOpenModalBaja} closeModal={closeModalBaja}>
+        <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-16 text-gray-400">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
+
         </div>
-      </dialog>
+        <h3 className="mb-4 text-lg font-semibold text-center">¿Estás seguro que deseas dar de baja al usuario?</h3>
+        <button onClick={cambiarEstadoUsuario} className="bg-red-500 text-white border-none px-4 py-2 rounded transition-colors duration-300 hover:bg-red-600">
+            Si, estoy seguro
+        </button>
+        <button onClick={closeModalBaja1} className="text-gray-500 ml-5 bg-white hover:bg-gray-100 focus:ring-4 transition-colors duration-300 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 text-center">
+            Cancelar     
+        </button>
+      </Modal>
+
+
+      {/* modal para confirmacion de dar de alta */}
+      <Modal isOpen={isOpenModalAlta} closeModal={closeModalAlta}>
+        <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-16 text-gray-400">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
+
+        </div>
+        <h3 className="mb-4 text-lg font-semibold text-center">¿Estás seguro que deseas dar de alta al usuario?</h3>
+        <button onClick={cambiarEstadoUsuario} className="bg-green-500 text-white border-none px-4 py-2 rounded transition-colors duration-300 hover:bg-green-600">
+            Si, estoy seguro
+        </button>
+        <button onClick={closeModalAlta1} className="text-gray-500 ml-5 bg-white hover:bg-gray-200 focus:ring-4 transition-colors duration-300 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 text-center">
+            Cancelar     
+        </button>
+      </Modal>
     </div>
   );
 };
